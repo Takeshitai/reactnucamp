@@ -1,34 +1,43 @@
-import { FlatList } from 'react-native';
-import { Avatar, ListItem, Title } from 'react-native-elements';
-// import { useState } from 'react';
-// import { CAMPSITES } from '../shared/campsites';
+import { FlatList, Text, View } from 'react-native';
+import { Tile } from 'react-native-elements';
 import { useSelector } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
-import { Tile } from 'react-native-elements';
+import Loading from '../components/LoadingComponent';
 
 const DirectoryScreen = ({ navigation }) => {
-  // const [campsites, setCampsites] = useState(CAMPSITES);
-  const campsites = useSelector((state) => state.campsites);
+    const campsites = useSelector((state) => state.campsites);
 
-  const renderDirectoryItem = ({ item: campsite }) => {
+    if (campsites.isLoading) {
+        return <Loading />;
+    }
+    if (campsites.errMess) {
+        return (
+            <View>
+                <Text>{campsites.errMess}</Text>
+            </View>
+        );
+    }
+
+    const renderDirectoryItem = ({ item: campsite }) => {
+        return (
+            <Tile
+                title={campsite.name}
+                caption={campsite.description}
+                featured
+                onPress={() =>
+                    navigation.navigate('CampsiteInfo', { campsite })
+                }
+                imageSrc={{ uri: baseUrl + campsite.image }}
+            />
+        );
+    };
     return (
-      <Tile 
-        title={campsite.name}
-        caption={campsite.description}
-        featured
-        onPress={() => navigation.navigate('CampsiteInfo', {campsite})}
-        imageSrc={{ uri: baseUrl + campsite.image}}
-      />
-        
+        <FlatList
+            data={campsites.campsitesArray}
+            renderItem={renderDirectoryItem}
+            keyExtractor={(item) => item.id.toString()}
+        />
     );
-  };
-  return (
-    <FlatList
-    data={campsites.campsitesArray}
-    renderItem={renderDirectoryItem}
-    keyExtractor={(item) => item.id.toString()}
-    />
-  );
-}; // end of DirectoryScreen()
+};
 
 export default DirectoryScreen;
