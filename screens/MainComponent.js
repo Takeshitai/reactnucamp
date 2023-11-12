@@ -239,20 +239,21 @@ const Main = () => {
     dispatch(fetchComments());
   }, [dispatch]);
 
-  useEffect(() => {
-    NetInfo.fetch().then((connectionInfo) => {
+  const showNetInfo = async () => {
+    try {
+      const connectionInfo = await NetInfo.fetch();
+      const connectionMsg =
+        'Initial Network Connectivity Type: ' + connectionInfo.type;
       Platform.OS === 'ios'
-        ? Alert.alert(
-          'Initial Network Connectivity Type:',
-          connectionInfo.type
-        )
-        : ToastAndroid.show(
-          'Initial Network Connectivity Type: ' +
-          connectionInfo.type,
-          ToastAndroid.LONG
-        );
-    });
+        ? Alert.alert('Initial Network Connectivity Type:', connectionMsg)
+        : ToastAndroid.show(connectionMsg, ToastAndroid.LONG);
+    } catch (error) {
+      console.error('Error fetching network info:', error);
+    };
+  };
 
+  useEffect(() => {
+    showNetInfo(); // instructed to call the async function in task 3 
     const unsubscribeNetInfo = NetInfo.addEventListener(
       (connectionInfo) => {
         handleConnectivityChange(connectionInfo);
